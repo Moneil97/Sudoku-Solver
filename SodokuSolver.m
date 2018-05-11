@@ -44,6 +44,121 @@ function solveButtonPushed(numFields)
     
     findAllPossibleValues(nodes);
     
+    findNodesWithOneValue(nodes);
+    findValuesWithOnePossibleNode(nodes);
+    
+    
+end
+
+function modified = findNodesWithOneValue(nodes)
+    modified = 0;
+    for r = 1:9
+        for c = 1:9
+            if length(nodes(r,c).possibleValues) == 1
+                disp("node(" + r + "," + c + ") = " + nodes(r,c).possibleValues(1));
+                nodes(r,c).value = nodes(r,c).possibleValues(1);
+                nodes(r,c).isSolved = 1;
+                %delete from other possibleValues
+                
+                modified = 1;
+            end
+        end
+    end
+end
+
+function modified = findValuesWithOnePossibleNode(nodes)
+    modified = 0;
+    
+    %check each row
+    for r = 1:9
+        %count number of nodes each value is possible in
+        count = zeros(1,9);
+        index = zeros(1,9); %stores col of last counted value
+        for c = 1:9
+            if ~nodes(r,c).isSolved
+               for i = nodes(r,c).possibleValues
+                   count(i) = count(i)+1;
+                   index(i) = c;
+               end
+            end
+        end
+        
+        %if any col has only one place for a value, then that value must go there
+        for i = 1:9
+            if count(i) == 1
+                modified = 1;
+                disp("only place for " + i + " is nodes(" + r + "," + index(i) + ")");
+                nodes(r,index(i)).value = i;
+                nodes(r,index(i)).isSolved = 1;
+            end
+        end
+    end
+    
+    %check each col
+    for c = 1:9
+        %count number of nodes each value is possible in
+        count = zeros(1,9);
+        index = zeros(1,9); %stores row of last counted value
+        for r = 1:9
+            if ~nodes(r,c).isSolved
+               for i = nodes(r,c).possibleValues
+                   count(i) = count(i)+1;
+                   index(i) = r;
+               end
+            end
+        end
+        
+        %if any row has only one place for a value, then that value must go there
+        for i = 1:9
+            if count(i) == 1
+                modified = 1;
+                disp("only place for " + i + " is nodes(" + index(i) + "," + c + ")");
+                nodes(index(i), c).value = i;
+                nodes(index(i), c).isSolved = 1;
+            end
+        end
+    end
+    
+    %check each square
+    for rSquare = 0:2
+        for cSquare = 0:2
+            count = zeros(1,9);
+            index = zeros(2,9);
+            
+            for r = 1+rSquare*3:3+rSquare*3
+                for c = 1+cSquare*3:3+cSquare*3
+                    if ~nodes(r,c).isSolved
+                        for i = nodes(r,c).possibleValues
+                            count(i) = count(i)+1;
+                            index(1,i) = r;
+                            index(2,i) = c;
+                        end
+                    end
+                end
+            end
+            
+            %if any square has only one place for a value, then that value must go there
+            for i = 1:9
+                if count(i) == 1
+                    modified = 1;
+                    disp("only place for " + i + " is nodes(" + index(1,i) + "," + index(2,i) + ")");
+                    nodes(index(1,i), index(2,i)).value = i;
+                    nodes(index(1,i), index(2,i)).isSolved = 1;
+                end
+            end
+        end
+    end
+    
+end
+
+function deleteFromPossibilities(nodes, r, c, value)
+    
+%delete from rows
+
+%delete from cols
+
+%delete from square
+
 end
 
 function findAllPossibleValues(nodes)
