@@ -44,29 +44,37 @@ function solveButtonPushed(numFields)
     
     findAllPossibleValues(nodes);
     
-    findNodesWithOneValue(nodes);
-    findValuesWithOnePossibleNode(nodes);
-    
+    contin = 1;
+    while contin
+        contin = 0;
+        if findNodesWithOneValue(numFields, nodes)
+            contin = 1;
+        end
+        
+        if findValuesWithOnePossibleNode(numFields, nodes)
+            contin = 1;
+        end
+    end
     
 end
 
-function modified = findNodesWithOneValue(nodes)
+function modified = findNodesWithOneValue(numFields, nodes)
     modified = 0;
     for r = 1:9
         for c = 1:9
-            if length(nodes(r,c).possibleValues) == 1
+            if ~nodes(r,c).isSolved && length(nodes(r,c).possibleValues) == 1
                 disp("node(" + r + "," + c + ") = " + nodes(r,c).possibleValues(1));
                 nodes(r,c).value = nodes(r,c).possibleValues(1);
                 nodes(r,c).isSolved = 1;
-                %delete from other possibleValues
-                
+                deleteFromPossibilities(nodes, r, c, nodes(r,c).value);
                 modified = 1;
+                numFields(r,c).Value = nodes(r,c).value;
             end
         end
     end
 end
 
-function modified = findValuesWithOnePossibleNode(nodes)
+function modified = findValuesWithOnePossibleNode(numFields, nodes)
     modified = 0;
     
     %check each row
@@ -90,6 +98,8 @@ function modified = findValuesWithOnePossibleNode(nodes)
                 disp("only place for " + i + " is nodes(" + r + "," + index(i) + ")");
                 nodes(r,index(i)).value = i;
                 nodes(r,index(i)).isSolved = 1;
+                deleteFromPossibilities(nodes, r, index(i), i);
+                numFields(r,index(i)).Value = nodes(r,index(i)).value;
             end
         end
     end
@@ -115,6 +125,8 @@ function modified = findValuesWithOnePossibleNode(nodes)
                 disp("only place for " + i + " is nodes(" + index(i) + "," + c + ")");
                 nodes(index(i), c).value = i;
                 nodes(index(i), c).isSolved = 1;
+                deleteFromPossibilities(nodes, index(i), c, value);
+                numFields(index(i),c).Value = nodes(index(i),c).value;
             end
         end
     end
@@ -144,6 +156,8 @@ function modified = findValuesWithOnePossibleNode(nodes)
                     disp("only place for " + i + " is nodes(" + index(1,i) + "," + index(2,i) + ")");
                     nodes(index(1,i), index(2,i)).value = i;
                     nodes(index(1,i), index(2,i)).isSolved = 1;
+                    deleteFromPossibilities(nodes, index(1,i), index(2,i), value);
+                    numFields(index(1,i), index(2,i)).Value = nodes(index(1,i), index(2,i)).value;
                 end
             end
         end
@@ -151,14 +165,33 @@ function modified = findValuesWithOnePossibleNode(nodes)
     
 end
 
-function deleteFromPossibilities(nodes, r, c, value)
+function deleteFromPossibilities(nodes, row, col, value)
     
-%delete from rows
+    %delete from row
+    for c = 1:9
+        remove(nodes, row, c, value);
+    end
+    
+    %delete from cols
+    for r = 1:9
+        remove(nodes, r, col, value);
+    end
 
-%delete from cols
+    %delete from square
+    rSquare = floor((row-1)/3);
+    cSquare = floor((col-1)/3);
+    
+    for r = 1+rSquare*3:3+rSquare*3
+        for c = 1+cSquare*3:3+cSquare*3
+            remove(nodes, r, c, value);
+        end
+    end
 
-%delete from square
+end
 
+function remove(nodes, r, c, value)
+    pv = nodes(r, c).possibleValues;
+    nodes(r, c).possibleValues = pv(pv ~= value); %removes value from possibleValues
 end
 
 function findAllPossibleValues(nodes)
