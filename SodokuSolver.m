@@ -68,7 +68,7 @@ function modified = findNodesWithOneValue(numFields, nodes)
                 nodes(r,c).isSolved = 1;
                 deleteFromPossibilities(nodes, r, c, nodes(r,c).value);
                 modified = 1;
-                numFields(r,c).Value = nodes(r,c).value;
+                numFields(9*(r-1)+c).Value = nodes(r,c).value;
             end
         end
     end
@@ -99,7 +99,7 @@ function modified = findValuesWithOnePossibleNode(numFields, nodes)
                 nodes(r,index(i)).value = i;
                 nodes(r,index(i)).isSolved = 1;
                 deleteFromPossibilities(nodes, r, index(i), i);
-                numFields(r,index(i)).Value = nodes(r,index(i)).value;
+                numFields(9*(r-1)+index(i)).Value = nodes(r,index(i)).value;
             end
         end
     end
@@ -125,8 +125,8 @@ function modified = findValuesWithOnePossibleNode(numFields, nodes)
                 disp("only place for " + i + " is nodes(" + index(i) + "," + c + ")");
                 nodes(index(i), c).value = i;
                 nodes(index(i), c).isSolved = 1;
-                deleteFromPossibilities(nodes, index(i), c, value);
-                numFields(index(i),c).Value = nodes(index(i),c).value;
+                deleteFromPossibilities(nodes, index(i), c, i);
+                numFields(9*(index(i)-1)+c).Value = nodes(index(i),c).value;
             end
         end
     end
@@ -156,8 +156,8 @@ function modified = findValuesWithOnePossibleNode(numFields, nodes)
                     disp("only place for " + i + " is nodes(" + index(1,i) + "," + index(2,i) + ")");
                     nodes(index(1,i), index(2,i)).value = i;
                     nodes(index(1,i), index(2,i)).isSolved = 1;
-                    deleteFromPossibilities(nodes, index(1,i), index(2,i), value);
-                    numFields(index(1,i), index(2,i)).Value = nodes(index(1,i), index(2,i)).value;
+                    deleteFromPossibilities(nodes, index(1,i), index(2,i), i);
+                    numFields(9*(index(1,i)-1)+index(2,i)).Value = nodes(index(1,i), index(2,i)).value;
                 end
             end
         end
