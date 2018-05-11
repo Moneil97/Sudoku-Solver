@@ -25,9 +25,32 @@ end
 button = uibutton(fig, 'push');
 button.FontSize = 26;
 button.Position = [241 17 100 40];
-button.ButtonPushedFcn = @(btn,event) plotButtonPushed(cells);
+button.ButtonPushedFcn = @(btn,event) solveButtonPushed(cells);
 button.Text = 'Solve';
 
-function plotButtonPushed(cells)
-    disp("push");
+function solveButtonPushed(cells)
+    vals = zeros(9);
+    for y = 1:9
+        for x = 1:9
+            vals(y,x) = cells(9*(y-1)+x).Value;
+        end
+    end
+    disp(vals);
+end
+
+function valid = isValid(cells, r, c, value)
+    %save the previous value and replace it with the new value to test
+    oldValue = cells(r,c);
+    cells(r,c) = value;
+    
+    cells(r,c) = oldValue;
+end
+
+function valid = checkRow()
+end
+
+function valid = checkCol()
+end
+
+function valid = checkThree()
 end
