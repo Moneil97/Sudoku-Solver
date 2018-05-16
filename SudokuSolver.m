@@ -21,14 +21,93 @@ for y = 1:9
     end
 end
 
+% Create FileMenu
+fileMenu = uimenu(fig);
+fileMenu.Text = 'File';
+
+% Create Save submenu
+saveMenu = uimenu(fileMenu);
+saveMenu.Text = 'Save .sudoku';
+saveMenu.MenuSelectedFcn = @(btn,event) saveMenuSelected(numFields);
+
+% Create Load submenu
+loadMenu = uimenu(fileMenu);
+loadMenu.Text = 'Load .sudoku';
+loadMenu.MenuSelectedFcn = @(btn,event) loadMenuSelected(numFields);
+
+% Create InputMenu
+inputMenu = uimenu(fig);
+inputMenu.Text = 'Input';
+
+% Create Clear submenu
+clearMenu = uimenu(inputMenu);
+clearMenu.Text = 'Clear Input';
+clearMenu.MenuSelectedFcn = @(btn,event) clearMenuSelected(numFields);
+
 % Create SolveButton
-button = uibutton(fig, 'push');
-button.FontSize = 26;
-button.Position = [241 17 100 40];
-button.ButtonPushedFcn = @(btn,event) solveButtonPushed(numFields);
-button.Text = 'Solve';
+solveButton = uibutton(fig, 'push');
+solveButton.FontSize = 26;
+solveButton.Position = [241 17 100 40];
+solveButton.ButtonPushedFcn = @(btn,event) solveButtonPushed(numFields);
+solveButton.Text = 'Solve';
+
+function clearMenuSelected(numFields)
+    for i = 1:81
+        numFields(i).Value = 0;
+    end
+end
+
+function saveMenuSelected(numFields)
+    file = uiputfile('*.sudoku');
+    if file == 0
+        disp('User selected Cancel')
+        return;
+    end
+    
+    fileID = fopen(file,'w');
+    if fileID == -1
+        disp("failed to open file");
+        return;
+    end
+    
+    f(81) = 0;
+    for i = 1:81
+        f(i) = numFields(i).Value;
+    end
+    
+    fprintf(fileID,'%d ', f);
+    fclose(fileID);
+end
+
+function loadMenuSelected(numFields)
+    file = uigetfile('*.sudoku');
+    
+    if file == 0
+        disp('User selected Cancel')
+        return;
+    end
+    
+    fileID = fopen(file,'r');
+    if fileID == -1
+        disp("failed to open file");
+        return;
+    end
+    
+    f = fscanf(fileID, '%d');
+    fclose(fileID);
+    
+    for i = 1:81
+        numFields(i).Value = f(i);
+    end
+    
+end
 
 function solveButtonPushed(numFields)
+
+    %lock all fields
+    for i = 1:81
+        numFields(i).Enable = 'off';
+    end
     
     %generate 9x9 grid of Nodes
     nodes(9,9) = Node();
@@ -45,6 +124,21 @@ function solveButtonPushed(numFields)
     findAllPossibleValues(nodes);
     
     tic
+    quickSolve(numFields, nodes);
+    toc
+    
+    tic
+    bruteForce(nodes, numFields);
+    toc
+    
+    %unlock all fields
+    for i = 1:81
+        numFields(i).Enable = 'on';
+    end
+    
+end
+
+function quickSolve(numFields, nodes)
     contin = 1;
     while contin
         contin = 0;
@@ -56,12 +150,6 @@ function solveButtonPushed(numFields)
             contin = 1;
         end
     end
-    toc
-    
-    tic
-    bruteForce(nodes, numFields);
-    toc
-    
 end
 
 function bruteForce(nodes, numFields)
@@ -72,8 +160,7 @@ function bruteForce(nodes, numFields)
         for c = 1:9
             if ~nodes(r,c).isSolved
                 total = total * length(nodes(r,c).possibleValues);
-            else
-                bruteForceNeeded = 1;
+                bruteForceNeeded = 1; 
             end
         end
     end
